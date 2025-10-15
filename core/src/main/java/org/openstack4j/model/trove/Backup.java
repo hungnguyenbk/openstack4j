@@ -14,4 +14,15 @@ public interface Backup {
     String getId();
 
     String getStatus();
+
+    String getDescription();
+
+    String getLocationRef();
+
+    String getInstanceId();
+
+    String getParentId();
+
+    String getProjectId();
+
 }

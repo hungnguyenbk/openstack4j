@@ -21,6 +21,16 @@ public class TroveBackup implements Backup {
 
     private String size;
 
+    private String description;
+
+    private String locationRef;
+
+    private String instanceId;
+
+    private String parentId;
+
+    private String projectId;
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("TroveBackup{");
@@ -29,6 +39,11 @@ public class TroveBackup implements Backup {
         sb.append(", name='").append(name).append('\'');
         sb.append(", status='").append(status).append('\'');
         sb.append(", size='").append(size).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", locationRef='").append(locationRef).append('\'');
+        sb.append(", instanceId='").append(instanceId).append('\'');
+        sb.append(", parentId='").append(parentId).append('\'');
+        sb.append(", projectId='").append(projectId).append('\'');
         sb.append(", updated=").append(updated);
         sb.append('}');
         return sb.toString();
@@ -70,6 +85,31 @@ public class TroveBackup implements Backup {
     @Override
     public String getStatus() {
         return status;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String getLocationRef() {
+        return locationRef;
+    }
+
+    @Override
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    @Override
+    public String getParentId() {
+        return parentId;
+    }
+
+    @Override
+    public String getProjectId() {
+        return projectId;
     }
 
     @Override
