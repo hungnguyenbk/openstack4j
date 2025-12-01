@@ -1,7 +1,7 @@
 OpenStack4j
 ===========
 
-[![Build Status](https://travis-ci.org/openstack4j/openstack4j.svg?branch=master)](https://travis-ci.org/openstack4j/openstack4j)
+[![Build Status](https://github.com/openstack4j/openstack4j/actions/workflows/ci.yaml/badge.svg)](https://github.com/openstack4j/openstack4j/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)]()
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.openstack4j.core/openstack4j/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.openstack4j.core/openstack4j)
 [![javadoc](https://javadoc.io/badge2/com.github.openstack4j.core/openstack4j-core/javadoc.svg)](https://javadoc.io/doc/com.github.openstack4j.core/openstack4j-core)
@@ -21,11 +21,19 @@ OpenStack4j is a fluent OpenStack client that allows provisioning and control of
 
 * GitHub Issues: [Click Here](https://github.com/openstack4j/openstack4j/issues)
 
-## Requirements
+## Java version support
 
-* OpenStack4j 3.2.X - Java 8+
-* OpenStack4j 3.0.X - Java 7 (JDK 8 preferred)
-* OpenStack4j 2.0.X - Java 7
+| ----                                | Java 8 | Java 11 | Java 17 | Java 21 |
+|-------------------------------------|--------|---------|---------|---------|
+| OpenStack4j                         | ?      | 🟢      | 🟢      | 🟢      |
+| HttpURL Connector                   | ?      | 🟢      | *       | *       |
+| HttpComponents-HttpClient Connector | ?      | 🟢      | 🟢      | 🟢      |
+| Jersey2 Connector                   | ?      | 🟢      | *       | *       |
+| OKHttp Connector                    | ?      | 🟢      | 🟢      | 🟢      |
+| RestEasy Connector                  | ?      | 🟢      | 🟢      | 🟢      |
+
+*) Starting with Java 16, it is not possible to use HttpUrlConnection to perform PATH requests.
+Connectors depending on native JDK http stack will not work after Java 16.
 
 Maven
 -----
@@ -129,7 +137,7 @@ OSClientV3 os = OSFactory.builderV3()
         .endpoint("http://<fqdn>:5000/v3")
         .credentials("admin", "secret", Identifier.byId("user domain id"))
         .scopeToProject(Identifier.byId("project id"))
-        .authenticate());
+        .authenticate();
 ```
 (2) authenticate with domain-scope
 ```java
@@ -137,7 +145,7 @@ OSClientV3 os = OSFactory.builderV3()
         .endpoint("http://<fqdn>:5000/v3")
         .credentials("admin", "secret", Identifier.byId("user domain id"))
         .scopeToDomain(Identifier.byId("domain id"))
-        .authenticate());
+        .authenticate();
 ```
 
 (3) authenticate unscoped
@@ -154,7 +162,7 @@ OSClientV3 os = OSFactory.builderV3()
         .endpoint("http://<fqdn>:5000/v3")
         .token("token id")
         .scopeToProject(Identifier.byId("project id"))
-        .authenticate());
+        .authenticate();
 ```
 (5) authenticate using client certificate
 ```bash

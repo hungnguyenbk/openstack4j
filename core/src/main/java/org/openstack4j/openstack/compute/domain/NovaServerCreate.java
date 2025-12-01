@@ -1,15 +1,11 @@
 package org.openstack4j.openstack.compute.domain;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.node.BinaryNode;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.openstack4j.model.compute.*;
 import org.openstack4j.model.compute.Server.DiskConfig;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
@@ -36,6 +32,9 @@ public class NovaServerCreate implements ServerCreate {
     private String keyName;
     @JsonProperty("availability_zone")
     private String availabilityZone;
+    private String host;
+    @JsonProperty("hypervisor_hostname")
+    private String hypervisorHostName;
     @JsonProperty("config_drive")
     private Boolean configDrive;
 
@@ -133,6 +132,16 @@ public class NovaServerCreate implements ServerCreate {
         return availabilityZone;
     }
 
+    @Override
+    public String getHost() {
+        return host;
+    }
+
+    @Override
+    public String getHypervisorHostName() {
+        return hypervisorHostName;
+    }
+
     @JsonIgnore
     @Override
     public Map<String, Object> getSchedulerHints() {
@@ -160,14 +169,14 @@ public class NovaServerCreate implements ServerCreate {
     @Override
     public void addPersonality(String path, String contents) {
         if (personality == null)
-            personality = Lists.newArrayList();
+            personality = new ArrayList<>();
         personality.add(new Personality(path, contents));
     }
 
     @Override
     public void addSecurityGroup(String name) {
         if (securityGroups == null)
-            securityGroups = Lists.newArrayList();
+            securityGroups = new ArrayList<>();
         securityGroups.add(new SecurityGroupInternal(name));
     }
 
@@ -185,7 +194,7 @@ public class NovaServerCreate implements ServerCreate {
 
     private void initNetworks() {
         if (networks == null)
-            networks = Lists.newArrayList();
+            networks = new ArrayList<>();
     }
 
     static class SecurityGroupInternal implements SecurityGroup {
@@ -282,7 +291,7 @@ public class NovaServerCreate implements ServerCreate {
             if (path == null || contents == null) return this;
 
             if (m.personality == null)
-                m.personality = Lists.newArrayList();
+                m.personality = new ArrayList<>();
             m.personality.add(new Personality(path, new BinaryNode(contents.getBytes()).asText()));
             return this;
         }
@@ -296,6 +305,18 @@ public class NovaServerCreate implements ServerCreate {
         @Override
         public ServerCreateBuilder availabilityZone(String availabilityZone) {
             m.availabilityZone = availabilityZone;
+            return this;
+        }
+
+        @Override
+        public ServerCreateBuilder host(String host) {
+            m.host = host;
+            return this;
+        }
+
+        @Override
+        public ServerCreateBuilder hypervisorHostName(String hypervisorHostName) {
+            m.hypervisorHostName = hypervisorHostName;
             return this;
         }
 
@@ -314,7 +335,7 @@ public class NovaServerCreate implements ServerCreate {
         @Override
         public ServerCreateBuilder blockDevice(BlockDeviceMappingCreate blockDevice) {
             if (blockDevice != null && m.blockDeviceMapping == null) {
-                m.blockDeviceMapping = Lists.newArrayList();
+                m.blockDeviceMapping = new ArrayList<>();
             }
             m.blockDeviceMapping.add(blockDevice);
             return this;
@@ -329,7 +350,7 @@ public class NovaServerCreate implements ServerCreate {
         @Override
         public ServerCreateBuilder addMetadataItem(String key, String value) {
             if (m.metadata == null)
-                m.metadata = Maps.newHashMap();
+                m.metadata = new HashMap<>();
 
             m.metadata.put(key, value);
             return this;
@@ -353,7 +374,7 @@ public class NovaServerCreate implements ServerCreate {
 
         private ServerCreateBuilder addSchedulerHintItem(String key, Object value) {
             if (m.schedulerHints == null)
-                m.schedulerHints = Maps.newHashMap();
+                m.schedulerHints = new HashMap<>();
 
             m.schedulerHints.put(key, value);
             return this;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.google.common.base.MoreObjects;
+import org.openstack4j.util.ToStringHelper;
 import org.openstack4j.model.network.SecurityGroupRule;
 import org.openstack4j.model.network.builder.NetSecurityGroupRuleBuilder;
 import org.openstack4j.openstack.common.ListResult;
@@ -48,6 +48,9 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
 
     @JsonProperty("remote_group_id")
     private String remoteGroupId;
+
+    @JsonProperty("description")
+    private String description;
 
     public static NetSecurityGroupRuleBuilder builder() {
         return new SecurityGroupRuleConcreteBuilder();
@@ -140,13 +143,20 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
     public String getSecurityGroupId() {
         return this.securityGroupId;
     }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues()
+        return new ToStringHelper(this)
                 .add("id", id).add("tenantId", tenantId)
                 .add("securityGroupId", securityGroupId)
                 .add("direction", direction)
@@ -156,6 +166,7 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
                 .add("protocol", protocol)
                 .add("remoteGroup", remoteGroupId)
                 .add("remoteIpPrefix", remoteIpPrefix)
+                .add("description", description)
                 .addValue("\n")
                 .toString();
     }
@@ -166,7 +177,7 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
     @Override
     public int hashCode() {
         return java.util.Objects.hash(id, tenantId, securityGroupId, direction, etherType,
-                portRangeMin, portRangeMax, protocol, remoteGroupId, remoteIpPrefix);
+                portRangeMin, portRangeMax, protocol, remoteGroupId, remoteIpPrefix, description);
     }
 
     /**
@@ -189,7 +200,8 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
                     java.util.Objects.equals(portRangeMax, that.portRangeMax) &&
                     java.util.Objects.equals(protocol, that.protocol) &&
                     java.util.Objects.equals(remoteGroupId, that.remoteGroupId) &&
-                    java.util.Objects.equals(remoteIpPrefix, that.remoteIpPrefix)) {
+                    java.util.Objects.equals(remoteIpPrefix, that.remoteIpPrefix) &&
+                    java.util.Objects.equals(description, that.description)) {
                 return true;
             }
         }
@@ -346,6 +358,15 @@ public class NeutronSecurityGroupRule implements SecurityGroupRule {
         @Override
         public NetSecurityGroupRuleBuilder remoteIpPrefix(String prefix) {
             r.remoteIpPrefix = prefix;
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NetSecurityGroupRuleBuilder description(String description) {
+            r.description = description;
             return this;
         }
     }

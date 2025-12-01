@@ -2,12 +2,9 @@ package org.openstack4j.openstack.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.openstack4j.api.Apis;
 import org.openstack4j.api.EndpointTokenProvider;
 import org.openstack4j.api.OSClient;
@@ -28,6 +25,7 @@ import org.openstack4j.api.murano.v1.AppCatalogService;
 import org.openstack4j.api.networking.NetworkingService;
 import org.openstack4j.api.networking.ext.ServiceFunctionChainService;
 import org.openstack4j.api.octavia.OctaviaService;
+import org.openstack4j.api.placement.PlacementService;
 import org.openstack4j.api.sahara.SaharaService;
 import org.openstack4j.api.senlin.SenlinService;
 import org.openstack4j.api.storage.BlockStorageService;
@@ -45,6 +43,7 @@ import org.openstack4j.model.identity.URLResolverParams;
 import org.openstack4j.model.identity.v2.Access;
 import org.openstack4j.model.identity.v3.Token;
 import org.openstack4j.openstack.identity.internal.DefaultEndpointURLResolver;
+import org.openstack4j.openstack.identity.v2.functions.ServiceToServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +74,6 @@ public abstract class OSClientSession<R, T extends OSClient<T>> implements Endpo
     }
 
     @SuppressWarnings("unchecked")
-    @VisibleForTesting
     public R useConfig(Config config) {
         this.config = config;
         return (R) this;
@@ -123,6 +121,13 @@ public abstract class OSClientSession<R, T extends OSClient<T>> implements Endpo
      */
     public NetworkingService networking() {
         return Apis.getNetworkingServices();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public PlacementService placement() {
+        return Apis.getPlacementServices();
     }
 
     /**
@@ -292,6 +297,13 @@ public abstract class OSClientSession<R, T extends OSClient<T>> implements Endpo
      */
     public boolean supportsNetwork() {
         return getSupportedServices().contains(ServiceType.NETWORK);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean supportsPlacement() {
+        return getSupportedServices().contains(ServiceType.PLACEMENT);
     }
 
     /**
@@ -469,9 +481,10 @@ public abstract class OSClientSession<R, T extends OSClient<T>> implements Endpo
 
         @Override
         public Set<ServiceType> getSupportedServices() {
-            if (supports == null)
-                supports = Sets.immutableEnumSet(Iterables.transform(access.getServiceCatalog(),
-                        new org.openstack4j.openstack.identity.v2.functions.ServiceToServiceType()));
+            if (supports == null) {
+                List<ServiceType> types = access.getServiceCatalog().stream().map(new ServiceToServiceType()).collect(Collectors.toList());
+                supports = Collections.unmodifiableSet(EnumSet.copyOf(types));
+            }
             return supports;
         }
 
@@ -574,9 +587,10 @@ public abstract class OSClientSession<R, T extends OSClient<T>> implements Endpo
          */
         @Override
         public Set<ServiceType> getSupportedServices() {
-            if (supports == null)
-                supports = Sets.immutableEnumSet(Iterables.transform(token.getCatalog(),
-                        new org.openstack4j.openstack.identity.v3.functions.ServiceToServiceType()));
+            if (supports == null) {
+                List<ServiceType> types = token.getCatalog().stream().map(new org.openstack4j.openstack.identity.v3.functions.ServiceToServiceType()).collect(Collectors.toList());
+                supports = Collections.unmodifiableSet(EnumSet.copyOf(types));
+            }
             return supports;
         }
 

@@ -11,17 +11,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.io.ByteStreams;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.bouncycastle.util.io.Streams;
 import org.openstack4j.api.OSClient.OSClientV2;
 import org.openstack4j.api.OSClient.OSClientV3;
+import org.openstack4j.api.exceptions.ConnectorNotFoundException;
 import org.openstack4j.core.transport.internal.HttpExecutor;
 import org.openstack4j.openstack.OSFactory;
 import org.openstack4j.openstack.identity.v2.domain.KeystoneAccess;
 import org.openstack4j.openstack.identity.v3.domain.KeystoneToken;
+import org.openstack4j.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -54,7 +54,12 @@ public abstract class AbstractTest {
 
         InetAddress inetAddress = InetAddress.getByName("localhost");
         LOG.info("localhost inet address: " + inetAddress.toString());
-        LOG.info("Tests using connector: " + HttpExecutor.create().getExecutorName() + " on " + getHost());
+
+        try {
+            LOG.info("Tests using connector: " + HttpExecutor.create().getExecutorName() + " on " + getHost());
+        } catch (ConnectorNotFoundException ex) {
+            LOG.info("Tests without any connector");
+        }
 
         try {
             LOG.info("Starting server on port " + service().port);
@@ -139,14 +144,14 @@ public abstract class AbstractTest {
     protected void respondWithHeaderAndResource(Map<String, String> headers, int statusCode, String resource)
             throws IOException {
         InputStream is = getClass().getResourceAsStream(resource);
-        respondWith(headers, statusCode, new String(ByteStreams.toByteArray(is)));
+        respondWith(headers, statusCode, new String(IOUtil.readBytes(is)));
     }
 
     protected void respondWithCodeAndResource(int statusCode, String resource) throws IOException {
         InputStream is = getClass().getResourceAsStream(resource);
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/json");
-        respondWith(headers, statusCode, new String(ByteStreams.toByteArray(is)));
+        respondWith(headers, statusCode, new String(IOUtil.readBytes(is)));
     }
 
     /**
@@ -188,16 +193,10 @@ public abstract class AbstractTest {
 
     protected OSClientV2 osv2() {
         if (osv2 == null) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(Include.NON_NULL);
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
-            mapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-            mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            ObjectMapper mapper = getObjectMapper();
 
             try {
-                String json = new String(Streams.readAll(getClass().getResourceAsStream(JSON_ACCESS)));
+                String json = getResource(JSON_ACCESS);
                 LOG.info(getClass().getName());
                 //LOG.info(getClass().getName() + ", JSON Access = " + json);
                 json = json.replaceAll("127.0.0.1", getHost());
@@ -207,7 +206,7 @@ public abstract class AbstractTest {
                         new org.openstack4j.openstack.identity.v2.domain.Credentials("test", "test"));
                 osv2 = OSFactory.clientFromAccess(a);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new Error(e);
             }
         }
         return osv2;
@@ -215,16 +214,10 @@ public abstract class AbstractTest {
 
     protected OSClientV3 osv3() {
         if (osv3 == null) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(Include.NON_NULL);
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
-            mapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-            mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            ObjectMapper mapper = getObjectMapper();
 
             try {
-                String json = new String(Streams.readAll(getClass().getResourceAsStream(JSON_TOKEN)));
+                String json = getResource(JSON_TOKEN);
                 LOG.info(getClass().getName());
                 json = json.replaceAll("devstack.openstack.stack", getHost());
                 KeystoneToken token = mapper.readValue(json, KeystoneToken.class);
@@ -235,15 +228,26 @@ public abstract class AbstractTest {
                 osv3 = OSFactory.clientFromToken(token);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new Error(e);
             }
         }
         return osv3;
     }
 
+    private static ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+        mapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+        mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        return mapper;
+    }
+
     protected String getResource(String resource) throws IOException {
         InputStream is = getClass().getResourceAsStream(resource);
-        return new String(ByteStreams.toByteArray(is));
+        return new String(IOUtil.readBytes(is));
     }
 
     private String getHost() {

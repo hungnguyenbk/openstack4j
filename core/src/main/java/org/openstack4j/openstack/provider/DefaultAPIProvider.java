@@ -1,8 +1,9 @@
 package org.openstack4j.openstack.provider;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.common.collect.Maps;
 import org.openstack4j.api.APIProvider;
 import org.openstack4j.api.artifact.ArtifactService;
 import org.openstack4j.api.artifact.ToscaTemplatesArtifactService;
@@ -30,6 +31,8 @@ import org.openstack4j.api.murano.v1.*;
 import org.openstack4j.api.networking.*;
 import org.openstack4j.api.networking.ext.*;
 import org.openstack4j.api.octavia.OctaviaService;
+import org.openstack4j.api.placement.PlacementService;
+import org.openstack4j.api.placement.ext.ResourceProviderService;
 import org.openstack4j.api.sahara.*;
 import org.openstack4j.api.senlin.*;
 import org.openstack4j.api.storage.*;
@@ -62,6 +65,8 @@ import org.openstack4j.openstack.murano.v1.internal.*;
 import org.openstack4j.openstack.networking.internal.*;
 import org.openstack4j.openstack.networking.internal.ext.*;
 import org.openstack4j.openstack.octavia.internal.OctaviaServiceImpl;
+import org.openstack4j.openstack.placement.internal.PlacementServiceImpl;
+import org.openstack4j.openstack.placement.internal.ext.ResourceProviderServiceImpl;
 import org.openstack4j.openstack.sahara.internal.*;
 import org.openstack4j.openstack.senlin.internal.*;
 import org.openstack4j.openstack.storage.block.internal.*;
@@ -83,8 +88,8 @@ import org.openstack4j.openstack.workflow.internal.*;
  */
 public class DefaultAPIProvider implements APIProvider {
 
-    private static final Map<Class<?>, Class<?>> bindings = Maps.newHashMap();
-    private static final Map<Class<?>, Object> instances = Maps.newConcurrentMap();
+    private static final Map<Class<?>, Class<?>> bindings = new HashMap<>();
+    private static final Map<Class<?>, Object> instances = new ConcurrentHashMap<>();
 
     /**
      * {@inheritDoc}
@@ -114,6 +119,8 @@ public class DefaultAPIProvider implements APIProvider {
         bind(QuotaSetService.class, QuotaSetServiceImpl.class);
         bind(HostService.class, HostServiceImpl.class);
         bind(NetworkingService.class, NetworkingServiceImpl.class);
+        bind(PlacementService.class, PlacementServiceImpl.class);
+        bind(ResourceProviderService.class, ResourceProviderServiceImpl.class);
         bind(NetworkService.class, NetworkServiceImpl.class);
         bind(ServiceFunctionChainService.class, ServiceFunctionChainServiceImpl.class);
         bind(FlowClassifierService.class, FlowClassifierServiceImpl.class);
@@ -289,6 +296,7 @@ public class DefaultAPIProvider implements APIProvider {
         bind(NeutronResourceTagService.class, NeutronResourceTagServiceImpl.class);
         bind(PortForwardingService.class, PortForwardingServiceImpl.class);
         bind(NetQosPolicyService.class, NetQosPolicyServiceImpl.class);
+        bind(NetQosPolicyBLRuleService.class, NetQosPolicyBLRuleServiceImpl.class);
     }
 
     /**

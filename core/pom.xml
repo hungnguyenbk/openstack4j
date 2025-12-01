@@ -2,13 +2,13 @@
     <parent>
         <groupId>com.github.openstack4j.core</groupId>
         <artifactId>openstack4j-parent</artifactId>
-        <version>3.10</version>
+        <version>3.13-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>openstack4j-core</artifactId>
     <name>OpenStack4j Core</name>
     <description>OpenStack Java API</description>
-    <url>http://github.com/openstack4j/openstack4j/</url>
+    <url>https://github.com/openstack4j/openstack4j/</url>
     <packaging>jar</packaging>
 
     <build>
@@ -37,6 +37,7 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <version>5.1.8</version>
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.name}</Bundle-Name>
@@ -180,9 +181,14 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
+        </dependency>
+        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.15</version>
+            <version>1.33</version>
         </dependency>
 
         <dependency>
@@ -203,7 +209,7 @@
                     <excludePackageNames>*.internal</excludePackageNames>
                     <reportOutputDirectory>docs</reportOutputDirectory>
                     <destDir>javadoc</destDir>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <doclint>none</doclint>
                 </configuration>
             </plugin>
         </plugins>

@@ -3,7 +3,7 @@ package org.openstack4j.openstack.networking.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.google.common.base.MoreObjects;
+import org.openstack4j.util.ToStringHelper;
 import org.openstack4j.model.network.NetworkUpdate;
 import org.openstack4j.model.network.builder.NetworkUpdateBuilder;
 
@@ -23,6 +23,8 @@ public class NeutronNetworkUpdate implements NetworkUpdate {
     private Boolean shared;
     @JsonProperty("admin_state_up")
     private Boolean adminStateUp;
+    @JsonProperty("is_default")
+    private Boolean isDefault;
 
     public static NetworkUpdateBuilder builder() {
         return new NetworkUpdateConcreteBuilder();
@@ -50,10 +52,18 @@ public class NeutronNetworkUpdate implements NetworkUpdate {
         return shared == null ? false: shared;
     }
 
+    @JsonIgnore
+    @Override
+    public boolean isDefault() {
+        return isDefault == null ? false: isDefault;
+    }
+
+
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues()
-                .add("name", name).add("adminStateUp", adminStateUp).add("shared", shared)
+        return new ToStringHelper(this)
+                .add("name", name).add("adminStateUp", adminStateUp).add("shared", shared).add("isDefault", isDefault)
                 .toString();
     }
 
@@ -95,6 +105,12 @@ public class NeutronNetworkUpdate implements NetworkUpdate {
         @Override
         public NetworkUpdateBuilder shared(boolean shared) {
             model.shared = shared;
+            return this;
+        }
+
+        @Override
+        public NetworkUpdateBuilder isDefault(boolean isDefault) {
+            model.isDefault = isDefault;
             return this;
         }
 
